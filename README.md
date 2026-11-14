@@ -12,7 +12,7 @@ surface route with the terrain, scientific objectives and observations needed
 to understand it. Mark destinations on the map, schedule activities, and see
 how walking speed, rest stops and autonomy affect the complete mission.
 
-[🚀 Open Marswalk]([https://tu-marswalk.streamlit.app](https://hackathon-g2xf29y2duz3mnk9yvtvwj.streamlit.app/))
+[🚀 Open Marswalk](https://hackathon-g2xf29y2duz3mnk9yvtvwj.streamlit.app/)
 
 [Quick start](#quick-start) · [Prepared missions](#five-prepared-missions) · [Data sources](#data-sources) · [Deploy from GitHub](#deploy-from-github)
 
