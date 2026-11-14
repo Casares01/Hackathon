@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>body{margin:0;font:13px system-ui;color:#334155}#map{height:480px;background:#e7ede9;border:1px solid #dbe2e8;border-radius:10px}.hint{padding:9px 2px;font-size:12px;color:#64748b}.toolbar{display:flex;gap:8px;padding:4px 0 10px}button{padding:7px 12px;border:1px solid #d7e0e7;border-radius:6px;background:#fff;color:#334155;font:12px system-ui;cursor:pointer}button:hover{background:#edf3f6}.zone{border:2px solid white;border-radius:50%;text-align:center;color:white;font:bold 12px/24px system-ui;box-shadow:0 1px 5px #34445480}.leaflet-tooltip{max-width:280px;white-space:normal;line-height:1.5}.leaflet-popup-content{line-height:1.55;max-width:280px}.terrain-key{display:none;align-items:center;gap:10px;font-size:11px;padding:8px 2px;color:#475569;flex-wrap:wrap}.gradient{width:150px;height:8px;border-radius:4px}</style>
+</head><body><div class="toolbar"><button id="world">View all Mars</button><button id="local">Back to origin</button></div><div id="map"></div><div class="terrain-key" id="terrain-key"><span id="minimum"></span><span class="gradient" id="gradient"></span><span id="maximum"></span><span id="contours"></span></div><div class="hint" id="hint">Loading Mars map…</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const send=(type,data={})=>parent.postMessage({isStreamlitMessage:true,type,...data},'*');
+let map,markers,selection,rasterLayer,baseLayer,baseKind='',signature='',routeSignature='',focusSignature='',selectedPoint=null,currentCenter=null;
+document.getElementById('world').onclick=()=>map?.fitBounds([[-85,-180],[85,180]]);
+document.getElementById('local').onclick=()=>currentCenter&&map?.setView(currentCenter,11);
+const safe=value=>{const e=document.createElement('span');e.textContent=String(value);return e.innerHTML};
+window.addEventListener('message',event=>{
+ if(event.data.type!=='streamlit:render')return;
+ const d=event.data.args;
+ if(typeof L==='undefined'){document.getElementById('hint').textContent='Could not load the map. Use coordinate entry or check your connection.';return;}
+ if(!map){
+  map=L.map('map',{crs:L.CRS.EPSG4326,minZoom:0,maxZoom:15,worldCopyJump:false,maxBounds:[[-90,-180],[90,180]]});
+  markers=L.layerGroup().addTo(map);
+  map.on('click',e=>{
+   const lat=e.latlng.lat,lon=e.latlng.lng;
+   if(lat < -90 || lat > 90 || lon < -180 || lon >=180)return;
+   selectedPoint=[lat,lon];
+   if(selection)map.removeLayer(selection);
+   selection=L.circleMarker(selectedPoint,{radius:9,color:'#fff',fillColor:'#e64b31',fillOpacity:1}).addTo(map);
+   send('streamlit:setComponentValue',{value:{lat,lon,event_id:Date.now()+':'+Math.random()},dataType:'json'});
+  });
+ }
+ const nextBase=d.basemap||'satellite';
+ if(baseKind!==nextBase){
+  if(baseLayer)map.removeLayer(baseLayer);
+  baseLayer=nextBase==='topography'
+   ? L.tileLayer.wms('https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/mars/mars_simp_cyl.map',{layers:'MOLA_color',format:'image/png',version:'1.1.1',crs:L.CRS.EPSG4326,noWrap:true,bounds:[[-90,-180],[90,180]],maxNativeZoom:9,maxZoom:15,attribution:'USGS / NASA · MGS MOLA relief'})
+   : L.tileLayer('https://trek.nasa.gov/tiles/Mars/EQ/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0/default/default028mm/{z}/{y}/{x}.jpg',{maxNativeZoom:7,maxZoom:15,noWrap:true,bounds:[[-90,-180],[90,180]],attribution:'NASA / JPL · Viking MDIM 2.1'});
+  baseLayer.addTo(map);baseKind=nextBase;
+  baseLayer.on('tileerror',()=>document.getElementById('hint').textContent='Basemap service unavailable. Route coordinates remain selectable.');
+ }
+ currentCenter=[d.center.lat,d.center.lon];
+ const next=JSON.stringify(d.center);
+ if(signature!==next){map.setView([d.center.lat,d.center.lon],d.zoom||10);signature=next;}
+ markers.clearLayers();
+ for(const [i,p] of (d.points||[]).entries()){
+  const icon=L.divIcon({className:'zone',html:safe(p.label||i+1),iconSize:[24,24],iconAnchor:[12,12]});
+  const m=L.marker([p.lat,p.lon],{icon}).addTo(markers);
+  m.getElement().style.backgroundColor=p.color||'#b64f32';
+  const detail=p.detail?'<br>'+safe(p.detail):'';
+  m.bindTooltip(safe(p.label||i+1)+'. '+safe(p.name)+' · '+safe(p.type)+detail);
+  if(p.objective)m.bindPopup('<strong>'+safe(p.label||i+1)+'. '+safe(p.name)+'</strong><br>'+safe(p.objective)+detail);
+ }
+ if(d.route?.length){
+  const line=L.polyline(d.route.map(p=>[p[1],p[0]]),{color:'#e44332',weight:4}).addTo(markers);
+  const nextRoute=JSON.stringify(d.route);
+  if(routeSignature!==nextRoute){map.fitBounds(line.getBounds(),{padding:[35,35],maxZoom:15});routeSignature=nextRoute;}
+ }
+ if(rasterLayer){map.removeLayer(rasterLayer);rasterLayer=null;}
+ baseLayer.setOpacity(d.terrain && d.basemap==='topography' ? 0.12 : 1);
+ if(d.raster?.image){
+  const b=d.raster.bounds;
+  rasterLayer=L.imageOverlay(d.raster.image,[[b[0],b[2]],[b[1],b[3]]],{opacity:d.basemap==='topography'?1:.85,interactive:false}).addTo(map);
+  rasterLayer.bringToBack();
+ }
+ const key=document.getElementById('terrain-key');
+ key.style.display=d.terrain?'flex':'none';
+ if(d.terrain){
+  document.getElementById('minimum').textContent=Math.round(d.terrain.minimum_m).toLocaleString()+' m';
+  document.getElementById('maximum').textContent=Math.round(d.terrain.maximum_m).toLocaleString()+' m';
+  document.getElementById('gradient').style.background='linear-gradient(to right,'+d.terrain.palette.join(',')+')';
+  document.getElementById('contours').textContent='Contours '+d.terrain.contour_interval_m.toLocaleString()+' m · MGS MOLA';
+ }
+ if(d.focus){
+  const p=d.focus;
+  L.circleMarker([p.lat,p.lon],{radius:19,color:'#fff',weight:4,fillColor:'#b64f32',fillOpacity:.4}).addTo(markers).bindTooltip(safe(p.name),{permanent:true});
+  const nextFocus=JSON.stringify(p);
+  if(focusSignature!==nextFocus){map.setView([p.lat,p.lon],Math.max(map.getZoom(),12));focusSignature=nextFocus;}
+ }
+ document.getElementById('hint').textContent=d.readonly?(d.caption||'Red route · hover over a zone to inspect its data.'):'Click to add a destination.';
+ // Result maps are read-only: no selected coordinates can modify a saved plan.
+ if(d.readonly)map.off('click');
+ map.invalidateSize();send('streamlit:setFrameHeight',{height:d.terrain?605:570});
+});
+send('streamlit:componentReady',{apiVersion:1});send('streamlit:setFrameHeight',{height:570});
+</script></body></html>
