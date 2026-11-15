@@ -32,10 +32,6 @@ stations are planning proposals, not a verified rover track.*
 | **Connect observations to the route** | View infrared imagery under the path, query geology at numbered stops, and inspect relevant historical weather and radiation data. |
 | **Take the plan with you** | Export the route, activities, rest stops and resource provenance as GeoJSON. Download the route-area THEMIS mosaic separately. |
 
-There is no fixed exploration radius. The download area follows your points,
-and the input fields have no arbitrary numeric caps. Values are validated
-when needed for geographical and mathematical correctness.
-
 ## Quick start
 
 Use **Python 3.12** for the tested setup. Download or clone this repository,
