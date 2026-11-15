@@ -72,8 +72,6 @@ Open the local URL printed by Streamlit, normally **http://localhost:8501**.
 An internet connection is required for the basemaps and external data services.
 No NASA API key is required for the currently connected sources.
 
-For the existing Windows setup, `run.ps1` also starts the app. It uses a local
-`.runtime` interpreter when present, otherwise the active `python` command.
 
 ## Plan your first Marswalk
 
