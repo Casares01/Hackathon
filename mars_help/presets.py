@@ -17,8 +17,6 @@ PRESETS=[dict(
              objective='Study the Tharsis Montes volcano. Log surface texture and local relief before continuing west to Pavonis Mons.'),
         dict(name='Pavonis Mons',type='Science',lat=1.48,lon=-112.96,minutes=30.0,
              objective='Repeat the surface observations from the first station. Review the remaining traverse time.'),
-        dict(name='Ulysses Patera',type='Science',lat=2.95,lon=-121.42,minutes=30.0,
-             objective='Finish the one-way traverse at the final destination. Capture a context panorama and close the route and observation logs.'),
     ],
 )]
 
