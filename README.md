@@ -194,14 +194,3 @@ or astronaut-safety system.**
 - The budget does not model oxygen consumption, suit performance or fatigue.
   Environmental observations do not certify safe conditions.
 - Routes crossing the antimeridian are not currently supported.
-
-## Acknowledgements
-
-Marswalk uses public data services from NASA, JPL, USGS and the contributing
-mission teams. RAD data are credited to D. Hassler / SwRI and distributed
-through NASA SPDF / CDAWeb. Weather reports are outreach products supplied
-through the NASA Mars feeds; consult their provider guidance for scientific use.
-
-This is an independent project. Use of these data does not imply NASA or USGS
-endorsement. Consult each provider's terms and attribution requirements when
-redistributing its products.
