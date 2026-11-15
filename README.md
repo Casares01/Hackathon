@@ -2,7 +2,7 @@
 
 **Explore the terrain. Plan the traverse. Put the science in context.**
 
-### [Open Marswalk][(https://hackathon-g2xf29y2duz3mnk9yvtvwj.streamlit.app/)]
+### [Open Marswalk](https://hackathon-g2xf29y2duz3mnk9yvtvwj.streamlit.app/)
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Built_with-Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)](https://streamlit.io/)
 [![Data](https://img.shields.io/badge/Data-NASA_%2F_USGS-22646B?style=flat-square)](#data-sources)
