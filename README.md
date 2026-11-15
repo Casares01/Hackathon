@@ -13,9 +13,9 @@ surface route with the terrain, scientific objectives and observations needed
 to understand it. Mark destinations on the map, schedule activities, and see
 how travel speed, rest stops and autonomy affect the complete mission.
 
-[Quick start](#quick-start) · [Prepared mission](#prepared-mission) · [Data sources](#data-sources) · [Deploy from GitHub](#deploy-from-github)
+[Quick start](#quick-start) · [Prepared mission](#prepared-mission) · [Data sources](#data-sources)
 
-![Marswalk showing a Jezero itinerary over MOLA elevation contours, with numbered science and rest stops and mission controls in the sidebar.](docs/images/marswalk-topography.png)
+![Marswalk UI.](docs/images/marswalk-topography.png)
 
 *Equatorial Westbound Traverse using NASA MOLA terrain. This is a multi-day
 rover planning scenario, not a verified or safety-certified traverse.*
@@ -30,10 +30,6 @@ rover planning scenario, not a verified or safety-certified traverse.*
 | **Understand each point** | Read its activity, on-site duration, elevation and available geological context. See how far the routing grid moved a requested target. |
 | **Connect observations to the route** | View infrared imagery under the path, query geology at numbered stops, and inspect relevant historical weather and radiation data. |
 | **Take the plan with you** | Export the route, activities, rest stops and resource provenance as GeoJSON. Download the route-area THEMIS mosaic separately. |
-
-There is no fixed exploration radius. The download area follows your points,
-and the input fields have no arbitrary numeric caps. Values are validated
-when needed for geographical and mathematical correctness.
 
 ## Quick start
 
@@ -75,9 +71,6 @@ Open the local URL printed by Streamlit, normally **http://localhost:8501**.
 An internet connection is required for the basemaps and external data services.
 No NASA API key is required for the currently connected sources.
 
-For the existing Windows setup, `run.ps1` also starts the app. It uses a local
-`.runtime` interpreter when present, otherwise the active `python` command.
-
 ## Plan your first Marswalk
 
 1. **Use the prepared mission**, loaded on startup, or select **Custom route**.
@@ -93,64 +86,25 @@ For the existing Windows setup, `run.ps1` also starts the app. It uses a local
 
 ## Prepared mission
 
-**Equatorial Westbound Traverse** is the only prepared mission. Coordinates
+**Volcanic Study Traverse** is the only prepared mission. Coordinates
 are supplied as **latitude, longitude**, and are visited in this order:
 
 | Point | Latitude | Longitude | Role |
 | --- | --- | --- | --- |
 | Origin | 2.78758 | -111.07354 | Departure |
-| 1 | 1.57 | -112.58 | Southern survey station |
-| 2 | 1.48 | -112.96 | Southwestern comparison station |
-| 3 | 2.95 | -121.42 | Western destination |
+| 1 | 1.57 | -112.58 | Tharsis Montes |
+| 2 | 1.48 | -112.96 | Pavonis Mons |
 
 The initial configuration is a **one-way rover scenario**: 10 km/h travel,
-120 hours of autonomy, 25% reserve, a 30-minute stop after every 120 minutes
+120 hours of autonomy, 5% reserve, a 30-minute stop after every 240 minutes
 of driving, and 30 minutes of activity at each destination. Return to origin
 is disabled by default. All values remain editable.
 
-A check against the 22-by-85 NASA MOLA grid produced approximately 672.8 km,
-85 h 17 min of total mission time, and 33 scheduled rests. After setting aside
-the reserve, the available time is 90 hours. Changes to terrain sampling,
-constraints or mission parameters can change these results.
-
-These are time-budget assumptions for a multi-day rover traverse. The app
-does not validate vehicle performance, battery/fuel capacity, crew sleep or
+The app does not validate vehicle performance, battery/fuel capacity, crew sleep or
 life support. The station names describe proposed observation tasks, not
 verified features or safe sites at those coordinates.
 
-## How the planning works
-
-Marswalk downloads an elevation grid covering the selected points and uses
-**Dijkstra's algorithm with eight-neighbour connectivity** to find routes
-through the destinations in their listed order. A sampled-slope constraint
-filters grid connections. The app does not optimise the order of visits.
-
-Rest stops are inserted along the resulting path using the configured travel
-speed and time budget. A sufficiently long manual rest resets the travel
-counter. Activities and pauses both count toward the complete mission time.
-
-<details>
-<summary><strong>Time-budget assumptions</strong></summary>
-
-```text
-usable_hours = autonomy_hours × (1 − reserve_percent / 100)
-travel_hours = route_distance_km / speed_kmh
-total_hours = travel_hours + activity_hours + rest_hours
-```
-
-The travel interval is the smaller of the continuous-travel setting and
-one quarter of usable autonomy. Walking defaults use a 60-minute maximum travel interval and 10-minute rests.
-The prepared rover mission overrides these with 120-minute driving intervals
-and 30-minute stops.
-
-This is an adjustable planning rule, not a physiological model. Resting does
-not replenish autonomy. A route that exceeds the remaining budget is flagged
-rather than presented as a feasible mission.
-
-</details>
-
 ## Data sources
-
 The prepared route is outside the connected Gale and Jezero environmental
 reference regions, so it is not assigned their weather or radiation values.
 Those sources remain available for custom routes in the supported regions.
@@ -198,58 +152,6 @@ lon,lat,value
 Declare the product source, variable and units. Samples inside the mission area
 are shown alongside the route; they do not affect pathfinding. The example
 above only illustrates the file format and is not a scientific dataset.
-
-## Deploy from GitHub
-
-The app can be deployed using [Streamlit Community Cloud](https://share.streamlit.io/):
-
-1. Push the project to a GitHub repository, including `app.py`,
-   `requirements.txt`, `mars_help/` and `.streamlit/`.
-2. Sign in to Community Cloud with GitHub and create an app.
-3. Select the repository, your branch and **`app.py`** as the entrypoint.
-4. Deploy, then add the generated public URL to the repository's
-   **About → Website** field and to this README.
-
-See the [official deployment guide](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/deploy).
-The local `.runtime/` and `.venv/` directories are excluded by `.gitignore`
-and should not be uploaded. GitHub Pages can host a project landing page,
-but [cannot execute this Python backend](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site).
-
-## Project structure
-
-```text
-app.py                    Streamlit entrypoint
-mars_help/
-  marswalk.py                 Mission workspace and application state
-  terrain_routes.py          Terrain routing and distance calculations
-  mission_planning.py        Route bounds, timing and rest scheduling
-  topography.py              Elevation shading and contour rendering
-  point_details.py           Activity descriptions and grid adjustments
-  presets.py                 Single prepared rover mission
-  mission_resources.py       Route-linked imagery and geological queries
-  environment.py             Weather and radiation retrieval and validation
-  route_views.py             Itinerary inspection and resource views
-  environment_views.py       Historical environmental context
-  mars_elevation.py          NASA Mars Trek elevation helper
-  map_picker/                Interactive Leaflet map component
-tests/                       Unit and Streamlit application tests
-docs/images/                 README screenshots
-.streamlit/config.toml        Application theme
-requirements.txt             Python dependencies
-run.ps1                      Windows launcher
-```
-
-### Development checks
-
-With the project environment active:
-
-```bash
-python -m unittest discover -s tests -v
-```
-
-The tests cover routing behaviour, rest timing, preset loading, route clearing,
-point inspection, topographic orientation and environmental-data handling.
-External providers are mocked in the automated UI tests.
 
 ## Scope and limitations
 
