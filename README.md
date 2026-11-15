@@ -15,7 +15,7 @@ how travel speed, rest stops and autonomy affect the complete mission.
 
 [Quick start](#quick-start) · [Prepared mission](#prepared-mission) · [Data sources](#data-sources)
 
-![Marswalk UI.](docs/images/1.png)
+![Marswalk UI.](docs/images/1.jpeg)
 
 *Equatorial Westbound Traverse using NASA MOLA terrain. This is a multi-day
 rover planning scenario, not a verified or safety-certified traverse.*
