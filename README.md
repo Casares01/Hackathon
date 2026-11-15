@@ -179,60 +179,6 @@ Declare the product source, variable and units. Samples inside the mission area
 are shown alongside the route; they do not affect pathfinding. The example
 above only illustrates the file format and is not a scientific dataset.
 
-## Deploy from GitHub
-
-The app can be deployed using [Streamlit Community Cloud](https://share.streamlit.io/):
-
-1. Push the project to a GitHub repository, including `example.py`,
-   `requirements.txt`, `mars_help/` and `.streamlit/`.
-2. Sign in to Community Cloud with GitHub and create an app.
-3. Select the repository, your branch and **`example.py`** as the entrypoint.
-4. Deploy, then add the generated public URL to the repository's
-   **About → Website** field and to this README.
-
-See the [official deployment guide](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/deploy).
-The local `.runtime/` and `.venv/` directories are excluded by `.gitignore`
-and should not be uploaded. GitHub Pages can host a project landing page,
-but [cannot execute this Python backend](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site).
-
-<!-- Once deployed, add an Open Marswalk link near the top using the real public URL. -->
-
-## Project structure
-
-```text
-example.py                    Streamlit entrypoint
-mars_help/
-  marswalk.py                 Mission workspace and application state
-  terrain_routes.py          Terrain routing and distance calculations
-  mission_planning.py        Route bounds, timing and rest scheduling
-  topography.py              Elevation shading and contour rendering
-  point_details.py           Activity descriptions and grid adjustments
-  presets.py                 Five editable mission templates
-  mission_resources.py       Route-linked imagery and geological queries
-  environment.py             Weather and radiation retrieval and validation
-  route_views.py             Itinerary inspection and resource views
-  environment_views.py       Historical environmental context
-  mars_elevation.py          NASA Mars Trek elevation helper
-  map_picker/                Interactive Leaflet map component
-tests/                       Unit and Streamlit application tests
-docs/images/                 README screenshots
-.streamlit/config.toml        Application theme
-requirements.txt             Python dependencies
-run.ps1                      Windows launcher
-```
-
-### Development checks
-
-With the project environment active:
-
-```bash
-python -m unittest discover -s tests -v
-```
-
-The tests cover routing behaviour, rest timing, preset loading, route clearing,
-point inspection, topographic orientation and environmental-data handling.
-External providers are mocked in the automated UI tests.
-
 ## Scope and limitations
 
 **Marswalk is an educational planning prototype, not a certified navigation
